@@ -1,0 +1,33 @@
+[submodule "mattborn/bornjson"]
+	path = mattborn/bornjson
+	url = https://github.com/mattborn/bornjson.git
+[submodule "mattborn/cardify"]
+	path = mattborn/cardify
+	url = https://github.com/mattborn/cardify.git
+[submodule "mattborn/gfux"]
+	path = mattborn/gfux
+	url = https://github.com/mattborn/gfux.git
+[submodule "mattborn/gitfarm"]
+	path = mattborn/gitfarm
+	url = https://github.com/mattborn/gitfarm.git
+[submodule "mattborn/hacklist"]
+	path = mattborn/hacklist
+	url = https://github.com/mattborn/hacklist.git
+[submodule "mattborn/markonce"]
+	path = mattborn/markonce
+	url = https://github.com/mattborn/markonce.git
+[submodule "mattborn/mirror"]
+	path = mattborn/mirror
+	url = https://github.com/mattborn/mirror.git
+[submodule "mattborn/pomoclock"]
+	path = mattborn/pomoclock
+	url = https://github.com/mattborn/pomoclock.git
+[submodule "mattborn/primitive-talk-to-json"]
+	path = mattborn/primitive-talk-to-json
+	url = https://github.com/mattborn/primitive-talk-to-json.git
+[submodule "mattborn/start-api"]
+	path = mattborn/start-api
+	url = https://github.com/mattborn/start-api.git
+[submodule "mattborn/thumby"]
+	path = mattborn/thumby
+	url = https://github.com/mattborn/thumby.git
