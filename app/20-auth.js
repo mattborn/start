@@ -42,7 +42,8 @@ const getProfile = async token => {
   }
 
   const token = localStorage.getItem('start_token')
-  if (!token) window.location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo`
+  if (!token)
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&scope=repo,read:org`
   else {
     log('Reusing token')
     await getProfile(token)
