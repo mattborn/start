@@ -1,33 +1,27 @@
-[submodule "mattborn/bornjson"]
-	path = mattborn/bornjson
-	url = https://github.com/mattborn/bornjson.git
-[submodule "mattborn/cardify"]
-	path = mattborn/cardify
-	url = https://github.com/mattborn/cardify.git
-[submodule "mattborn/gfux"]
-	path = mattborn/gfux
-	url = https://github.com/mattborn/gfux.git
-[submodule "mattborn/gitfarm"]
-	path = mattborn/gitfarm
-	url = https://github.com/mattborn/gitfarm.git
-[submodule "mattborn/hacklist"]
-	path = mattborn/hacklist
-	url = https://github.com/mattborn/hacklist.git
-[submodule "mattborn/markonce"]
-	path = mattborn/markonce
-	url = https://github.com/mattborn/markonce.git
-[submodule "mattborn/mirror"]
-	path = mattborn/mirror
-	url = https://github.com/mattborn/mirror.git
-[submodule "mattborn/pomoclock"]
-	path = mattborn/pomoclock
-	url = https://github.com/mattborn/pomoclock.git
-[submodule "mattborn/primitive-talk-to-json"]
-	path = mattborn/primitive-talk-to-json
-	url = https://github.com/mattborn/primitive-talk-to-json.git
-[submodule "mattborn/start-api"]
-	path = mattborn/start-api
-	url = https://github.com/mattborn/start-api.git
-[submodule "mattborn/thumby"]
-	path = mattborn/thumby
-	url = https://github.com/mattborn/thumby.git
+[submodule "cpqpro/cpqpro.github.io"]
+	path = cpqpro/cpqpro.github.io
+	url = https://github.com/cpqpro/cpqpro.github.io.git
+[submodule "designreborn/designreborn.github.io"]
+	path = designreborn/designreborn.github.io
+	url = https://github.com/designreborn/designreborn.github.io.git
+[submodule "moonadesign/focalconsulting.co"]
+	path = moonadesign/focalconsulting.co
+	url = https://github.com/moonadesign/focalconsulting.co.git
+[submodule "mattborn/hundred-vanilla"]
+	path = mattborn/hundred-vanilla
+	url = https://github.com/mattborn/hundred-vanilla.git
+[submodule "mattborn/mattborn.github.io"]
+	path = mattborn/mattborn.github.io
+	url = https://github.com/mattborn/mattborn.github.io.git
+[submodule "mattmeg/mattmeg.github.io"]
+	path = mattmeg/mattmeg.github.io
+	url = https://github.com/mattmeg/mattmeg.github.io.git
+[submodule "migmatt/migmatt.github.io"]
+	path = migmatt/migmatt.github.io
+	url = https://github.com/migmatt/migmatt.github.io.git
+[submodule "moonadesign/moonadesign.github.io"]
+	path = moonadesign/moonadesign.github.io
+	url = https://github.com/moonadesign/moonadesign.github.io.git
+[submodule "palmvader/palmvader.github.io"]
+	path = palmvader/palmvader.github.io
+	url = https://github.com/palmvader/palmvader.github.io.git
