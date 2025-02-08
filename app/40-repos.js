@@ -11,7 +11,7 @@ const getRepos = async (token, forceRefresh = false) => {
   })
 
   const { content, sha } = await response.json()
-  const { repos } = JSON.parse(atob(content))
+  const { repos } = JSON.parse(Base64.decode(content))
   repos.sort((a, b) => a.name.localeCompare(b.name))
 
   localStorage.setItem('start_pull', JSON.stringify(repos))
@@ -63,23 +63,56 @@ const normalizeRepo = repo => {
 }
 
 const fetchRepos = async token => {
-  const response = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated&direction=desc', {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-  const rawRepos = await response.json()
-  const newRepos = rawRepos.map(normalizeRepo)
+  try {
+    const userResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated&direction=desc', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    const userRepos = await userResponse.json()
 
-  const pullCache = JSON.parse(localStorage.getItem('start_pull') || '[]')
-  const newNames = newRepos.filter(r => !pullCache.find(p => p.name === r.name)).map(r => r.name)
-
-  if (newNames.length) {
-    const pushCache = JSON.parse(localStorage.getItem('start_push'))
-    const merged = [
-      ...pushCache,
-      ...newRepos.filter(r => newNames.includes(r.name)).filter(r => !pushCache.find(p => p.name === r.name)),
+    const orgs = [
+      'cpqpro',
+      'designreborn',
+      'mattmeg',
+      'meetbigfoot',
+      'metalytics-dev',
+      'migmatt',
+      'moonadesign',
+      'palmvader',
+      'withforco',
     ]
-    localStorage.setItem('start_push', JSON.stringify(merged.sort((a, b) => a.name.localeCompare(b.name))))
-    updateStatus()
+    let orgRepos = []
+
+    for (const org of orgs) {
+      const orgResponse = await fetch(
+        `https://api.github.com/orgs/${org}/repos?per_page=100&sort=updated&direction=desc`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
+      const repos = await orgResponse.json()
+      orgRepos = [...orgRepos, ...repos]
+    }
+
+    const allRepos = [...userRepos, ...orgRepos]
+    const newRepos = allRepos.map(normalizeRepo)
+
+    const pullCache = JSON.parse(localStorage.getItem('start_pull') || '[]')
+    const newNames = newRepos.filter(r => !pullCache.find(p => p.name === r.name)).map(r => r.name)
+
+    if (newNames.length) {
+      const pushCache = JSON.parse(localStorage.getItem('start_push') || '[]')
+      const merged = [
+        ...pushCache,
+        ...newRepos.filter(r => newNames.includes(r.name)).filter(r => !pushCache.find(p => p.name === r.name)),
+      ]
+      localStorage.setItem('start_push', JSON.stringify(merged.sort((a, b) => a.name.localeCompare(b.name))))
+      updateStatus()
+      log('Added new repos:', newNames)
+    } else {
+      log('No new repos found')
+    }
+  } catch (error) {
+    console.error('Error fetching repos:', error)
   }
 }
 
@@ -131,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       },
       body: JSON.stringify({
         message: `Update repos.json: +${changes.added} -${changes.removed} ~${changes.changed}`,
-        content: btoa(JSON.stringify(payload, null, 2)),
+        content: Base64.encode(JSON.stringify(payload, null, 2)) + '\n',
         sha,
       }),
     })
