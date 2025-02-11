@@ -25,3 +25,6 @@
 [submodule "palmvader/palmvader.github.io"]
 	path = palmvader/palmvader.github.io
 	url = https://github.com/palmvader/palmvader.github.io.git
+[submodule "mattborn/websuite-march-2025"]
+	path = mattborn/websuite-march-2025
+	url = https://github.com/mattborn/websuite-march-2025.git
