@@ -6,24 +6,43 @@ const getRepos = async (token, forceRefresh = false) => {
     return repos
   }
 
-  const response = await fetch('https://api.github.com/repos/mattborn/start/contents/repos.json', {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+  const response = await fetch(
+    'https://raw.githubusercontent.com/mattborn/start/main/repos.json',
+  )
 
-  const { content, sha } = await response.json()
-  const { repos } = JSON.parse(Base64.decode(content))
+  const data = await response.json()
+  const repos = data.repos
   repos.sort((a, b) => a.name.localeCompare(b.name))
 
+  // Log the raw data from repos.json
+  log('Raw repos.json data', {
+    reposCount: repos.length,
+    firstFewRepos: repos.slice(0, 3),
+    localCount: repos.filter(r => r.local).length,
+  })
+
   localStorage.setItem('start_pull', JSON.stringify(repos))
-  localStorage.setItem('start_sha', sha)
-  log('Pulled fresh repos')
   return repos
 }
 
 const filterChanges = (pushCache, pullCache) => {
+  // Add detailed logging
+  log('Comparing caches', {
+    pushCache: {
+      count: pushCache.length,
+      localCount: pushCache.filter(r => r.local).length,
+    },
+    pullCache: {
+      count: pullCache.length,
+      localCount: pullCache.filter(r => r.local).length,
+    },
+  })
+
   const changes = {
-    added: pushCache.filter(r => !pullCache.find(p => p.name === r.name)).length,
-    removed: pullCache.filter(r => !pushCache.find(p => p.name === r.name)).length,
+    added: pushCache.filter(r => !pullCache.find(p => p.name === r.name))
+      .length,
+    removed: pullCache.filter(r => !pushCache.find(p => p.name === r.name))
+      .length,
     changed: pushCache.filter(r => {
       const old = pullCache.find(p => p.name === r.name)
       return old && JSON.stringify(r) !== JSON.stringify(old)
@@ -40,7 +59,9 @@ const updateStatus = () => {
   console.log('Pending changes:', changes)
 
   const numChanges = changes.added + changes.changed + changes.removed
-  pushButton.textContent = numChanges ? `Push ${numChanges} changes` : 'No unsaved changes'
+  pushButton.textContent = numChanges
+    ? `Push ${numChanges} changes`
+    : 'No unsaved changes'
   pushButton.disabled = !numChanges
 }
 
@@ -59,14 +80,19 @@ const normalizeRepo = repo => {
     'size',
     'updated_at',
   ]
-  return Object.fromEntries(keys.map(key => [key, key === 'local' ? repo[key] || false : repo[key]]))
+  return Object.fromEntries(
+    keys.map(key => [key, key === 'local' ? repo[key] || false : repo[key]]),
+  )
 }
 
 const fetchRepos = async token => {
   try {
-    const userResponse = await fetch('https://api.github.com/user/repos?per_page=100&sort=updated&direction=desc', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    const userResponse = await fetch(
+      'https://api.github.com/user/repos?per_page=100&sort=updated&direction=desc',
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    )
     const userRepos = await userResponse.json()
 
     const orgs = [
@@ -97,15 +123,22 @@ const fetchRepos = async token => {
     const newRepos = allRepos.map(normalizeRepo)
 
     const pullCache = JSON.parse(localStorage.getItem('start_pull') || '[]')
-    const newNames = newRepos.filter(r => !pullCache.find(p => p.name === r.name)).map(r => r.name)
+    const newNames = newRepos
+      .filter(r => !pullCache.find(p => p.name === r.name))
+      .map(r => r.name)
 
     if (newNames.length) {
       const pushCache = JSON.parse(localStorage.getItem('start_push') || '[]')
       const merged = [
         ...pushCache,
-        ...newRepos.filter(r => newNames.includes(r.name)).filter(r => !pushCache.find(p => p.name === r.name)),
+        ...newRepos
+          .filter(r => newNames.includes(r.name))
+          .filter(r => !pushCache.find(p => p.name === r.name)),
       ]
-      localStorage.setItem('start_push', JSON.stringify(merged.sort((a, b) => a.name.localeCompare(b.name))))
+      localStorage.setItem(
+        'start_push',
+        JSON.stringify(merged.sort((a, b) => a.name.localeCompare(b.name))),
+      )
       updateStatus()
       log('Added new repos:', newNames)
     } else {
@@ -130,11 +163,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Initialize push cache if it doesn't exist
   let pushCache = localStorage.getItem('start_push')
   if (!pushCache) {
-    repos.forEach(repo => {
+    // Add debug logging
+    log('Initializing push cache from repos', { repos })
+
+    // Make sure we're not mutating the original repos
+    const initialPushCache = JSON.parse(JSON.stringify(repos))
+    initialPushCache.forEach(repo => {
       repo.local = repo.rootFiles?.includes('ABOUT.json') || false
     })
-    localStorage.setItem('start_push', JSON.stringify(repos.sort((a, b) => a.name.localeCompare(b.name))))
-    pushCache = JSON.stringify(repos)
+
+    localStorage.setItem(
+      'start_push',
+      JSON.stringify(
+        initialPushCache.sort((a, b) => a.name.localeCompare(b.name)),
+      ),
+    )
+    pushCache = JSON.stringify(initialPushCache)
+
+    // Log the initial state comparison
+    const pullCache = JSON.parse(localStorage.getItem('start_pull'))
+    const changes = filterChanges(initialPushCache, pullCache)
+    log('Initial state changes', { changes })
   }
 
   const pullButton = document.createElement('button')
@@ -156,18 +205,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       updated: Date.now(),
     }
 
-    const response = await fetch('https://api.github.com/repos/mattborn/start/contents/repos.json', {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github.v3+json',
+    const response = await fetch(
+      'https://api.github.com/repos/mattborn/start/contents/repos.json',
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+        },
+        body: JSON.stringify({
+          message: `Update repos.json: +${changes.added} -${changes.removed} ~${changes.changed}`,
+          content: Base64.encode(JSON.stringify(payload, null, 2)) + '\n',
+          sha,
+        }),
       },
-      body: JSON.stringify({
-        message: `Update repos.json: +${changes.added} -${changes.removed} ~${changes.changed}`,
-        content: Base64.encode(JSON.stringify(payload, null, 2)) + '\n',
-        sha,
-      }),
-    })
+    )
 
     if (response.ok) {
       const commit = await response.json()
@@ -184,8 +236,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateStatus()
   document.body.appendChild(pushButton)
 
+  const resetButton = document.createElement('button')
+  resetButton.textContent = 'Reset caches'
+  resetButton.onclick = resetCaches
+  document.body.appendChild(resetButton)
+
   // Use push cache for display
-  const displayRepos = [...JSON.parse(pushCache)].sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+  const displayRepos = [...JSON.parse(localStorage.getItem('start_push'))].sort(
+    (a, b) => new Date(b.updated_at) - new Date(a.updated_at),
+  )
   displayRepos.forEach(repo => {
     const div = document.createElement('div')
 
@@ -198,7 +257,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       repo.local = checkbox.checked
       const pushCache = JSON.parse(localStorage.getItem('start_push'))
       pushCache.find(r => r.name === repo.name).local = checkbox.checked
-      localStorage.setItem('start_push', JSON.stringify(pushCache.sort((a, b) => a.name.localeCompare(b.name))))
+      localStorage.setItem(
+        'start_push',
+        JSON.stringify(pushCache.sort((a, b) => a.name.localeCompare(b.name))),
+      )
       updateStatus()
     }
     div.appendChild(checkbox)
@@ -218,3 +280,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.appendChild(div)
   })
 })
+
+// Add a reset function for debugging
+const resetCaches = () => {
+  localStorage.removeItem('start_pull')
+  localStorage.removeItem('start_push')
+  localStorage.removeItem('start_sha')
+  window.location.reload()
+}
