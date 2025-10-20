@@ -12,7 +12,7 @@
 	url = https://github.com/mattborn/hundred-vanilla.git
 [submodule "mattborn/mattborn.github.io"]
 	path = mattborn/mattborn.github.io
-	url = https://github.com/mattborn/mattborn.github.io.git
+	url = https://github.com/mattborn/mattborn.github.io-2023.git
 [submodule "mattmeg/mattmeg.github.io"]
 	path = mattmeg/mattmeg.github.io
 	url = https://github.com/mattmeg/mattmeg.github.io.git
